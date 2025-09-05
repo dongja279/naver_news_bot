@@ -28,7 +28,28 @@ app.post('/kakaotalk', async (req, res) => {
             }
         });
 
+        // 네이버 API 응답이 성공하면 응답 데이터를 로그로 남깁니다.
+        console.log("Naver API response received:", response.data);
+
         const newsItems = response.data.items;
+
+        if (!newsItems || newsItems.length === 0) {
+            // 뉴스 아이템이 없을 경우, 사용자에게 안내 메시지를 보냅니다.
+            const output = {
+                version: "2.0",
+                template: {
+                    outputs: [
+                        {
+                            simpleText: {
+                                text: `"${userMessage}"에 대한 뉴스 검색 결과가 없습니다.`
+                            }
+                        }
+                    ]
+                }
+            };
+            return res.json(output);
+        }
+
         const newsCards = newsItems.map(item => ({
             title: item.title.replace(/(<([^>]+)>)/gi, ""),
             description: item.description.replace(/(<([^>]+)>)/gi, ""),
@@ -60,8 +81,10 @@ app.post('/kakaotalk', async (req, res) => {
         res.json(output);
 
     } catch (error) {
+        // API 호출 실패 시, 에러 상세 정보와 함께 카카오톡 포맷에 맞는 JSON을 반환합니다.
         console.error("Error fetching data from Naver API:", error.response ? error.response.data : error.message);
-        res.json({
+        
+        const errorOutput = {
             version: "2.0",
             template: {
                 outputs: [
@@ -72,7 +95,12 @@ app.post('/kakaotalk', async (req, res) => {
                     }
                 ]
             }
-        });
+        };
+
+        // 에러 응답을 직접 로그로 남겨서 어떤 JSON이 반환되었는지 확인합니다.
+        console.error("Error response sent to Kakao:", JSON.stringify(errorOutput, null, 2));
+
+        res.json(errorOutput);
     }
 });
 

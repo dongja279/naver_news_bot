@@ -28,7 +28,7 @@ app.get('/', async (req, res) => {
 
 app.get('/category/:name', async (req, res) => {
     const categoryName = req.params.name;
-    const sortOption = req.query.sort || 'date'; // Default to 'date' (latest)
+    const sortOption = req.query.sort || 'sim'; // Default to 'sim' (relevance)
     const category = categories.find(c => c.name === categoryName);
 
     if (!category) {

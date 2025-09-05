@@ -57,10 +57,16 @@ app.get('/category/:name', async (req, res) => {
         const newsHtml = newsItems.map(item => {
             const title = item.title.replace(/(<([^>]+)>)/gi, "");
             const description = item.description.replace(/(<([^>]+)>)/gi, "");
+            // 이미지 URL이 있을 경우를 대비한 placeholder
+            const imageUrl = 'https://placehold.co/150x100/e9ecef/adb5bd?text=No+Image';
+
             return `
                 <a href="${item.link}" target="_blank" class="news-item">
-                    <h3>${title}</h3>
-                    <p>${description}</p>
+                    <img src="${imageUrl}" alt="뉴스 이미지" class="news-thumbnail" />
+                    <div class="news-content">
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                    </div>
                 </a>
             `;
         }).join('');
@@ -70,7 +76,7 @@ app.get('/category/:name', async (req, res) => {
         `).join('');
 
         const sortOptionsHtml = `
-            <select id="sort-select" onchange="location = '/category/${categoryName}?sort=' + this.value;">
+            <select id="sort-select" class="sort-select" onchange="location = '/category/${categoryName}?sort=' + this.value;">
                 <option value="date" ${sortOption === 'date' ? 'selected' : ''}>최신순</option>
                 <option value="sim" ${sortOption === 'sim' ? 'selected' : ''}>관련성순</option>
             </select>
@@ -91,6 +97,7 @@ app.get('/category/:name', async (req, res) => {
                         line-height: 1.6;
                         color: #121212;
                         background-color: #f8f9fa;
+                        margin: 0;
                     }
                     .container {
                         max-width: 960px;
@@ -120,14 +127,22 @@ app.get('/category/:name', async (req, res) => {
                         align-items: center;
                         margin-bottom: 20px;
                     }
+                    .tab-wrapper {
+                        position: relative;
+                        margin-bottom: 30px;
+                    }
                     .tab-container {
                         display: flex;
-                        flex-wrap: nowrap; /* 모바일에서 한 줄로 표시 */
-                        overflow-x: auto; /* 가로 스크롤 가능하게 함 */
-                        -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
+                        flex-wrap: nowrap;
+                        overflow-x: auto;
+                        -webkit-overflow-scrolling: touch;
                         justify-content: flex-start;
-                        margin-bottom: 30px;
                         border-bottom: 1px solid #e9ecef;
+                        padding-bottom: 0px;
+                        scroll-behavior: smooth;
+                    }
+                    .tab-container::-webkit-scrollbar {
+                        display: none;
                     }
                     .tab-container a {
                         text-decoration: none;
@@ -137,15 +152,41 @@ app.get('/category/:name', async (req, res) => {
                         transition: all 0.3s ease;
                         font-size: 1rem;
                         border-bottom: 3px solid transparent;
-                        flex-shrink: 0; /* 탭이 줄어들지 않도록 함 */
-                        white-space: nowrap; /* 탭 이름이 줄바꿈되지 않도록 함 */
+                        flex-shrink: 0;
+                        white-space: nowrap;
                     }
-                    .tab-container a:hover, .tab-container a.tab-active {
+                    .tab-container a:hover {
                         color: #007bff;
                         border-bottom: 3px solid #007bff;
                     }
+                    .tab-container a.tab-active {
+                        color: #007bff;
+                        border-bottom: 3px solid #007bff;
+                    }
+                    .tab-wrapper::before,
+                    .tab-wrapper::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        width: 20px;
+                        pointer-events: none;
+                        z-index: 10;
+                    }
+                    .tab-wrapper::before {
+                        left: 0;
+                        background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0));
+                        transition: opacity 0.3s ease;
+                        opacity: 0;
+                    }
+                    .tab-wrapper::after {
+                        right: 0;
+                        background: linear-gradient(to left, #ffffff, rgba(255, 255, 255, 0));
+                    }
                     .news-item {
-                        display: block;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 15px;
                         background-color: #ffffff;
                         border: 1px solid #e9ecef;
                         margin-bottom: 15px;
@@ -159,6 +200,15 @@ app.get('/category/:name', async (req, res) => {
                         transform: translateY(-3px);
                         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
                     }
+                    .news-thumbnail {
+                        width: 150px;
+                        height: 100px;
+                        object-fit: cover;
+                        border-radius: 6px;
+                    }
+                    .news-content {
+                        flex: 1;
+                    }
                     .news-item h3 {
                         margin-top: 0;
                         font-size: 1.2rem;
@@ -171,7 +221,7 @@ app.get('/category/:name', async (req, res) => {
                         font-size: 0.9rem;
                         margin-bottom: 0;
                     }
-                    select {
+                    .sort-select {
                         padding: 8px 12px;
                         border-radius: 6px;
                         border: 1px solid #ced4da;
@@ -181,7 +231,7 @@ app.get('/category/:name', async (req, res) => {
                         color: #495057;
                         transition: border-color 0.2s ease;
                     }
-                    select:focus {
+                    .sort-select:focus {
                         outline: none;
                         border-color: #007bff;
                         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
@@ -196,12 +246,13 @@ app.get('/category/:name', async (req, res) => {
                         h1 {
                             font-size: 2rem;
                         }
-                        .controls-container {
-                           flex-direction: column;
-                           align-items: stretch;
-                        }
                         .news-item {
+                            flex-direction: column;
                             padding: 15px;
+                        }
+                        .news-thumbnail {
+                            width: 100%;
+                            height: auto;
                         }
                     }
                 </style>
@@ -215,11 +266,30 @@ app.get('/category/:name', async (req, res) => {
                     <div class="controls-container">
                         ${sortOptionsHtml}
                     </div>
-                    <div class="tab-container">
-                        ${tabHtml}
+                    <div class="tab-wrapper" onscroll="handleTabScroll(this)">
+                        <div class="tab-container">
+                            ${tabHtml}
+                        </div>
                     </div>
-                    ${newsHtml}
+                    <div id="news-list">
+                        ${newsHtml}
+                    </div>
                 </div>
+
+                <script>
+                    const tabWrapper = document.querySelector('.tab-wrapper');
+                    const tabContainer = document.querySelector('.tab-container');
+
+                    function handleTabScroll(element) {
+                        const hasLeftShadow = element.scrollLeft > 0;
+                        const hasRightShadow = element.scrollWidth - element.scrollLeft > element.clientWidth;
+                        element.classList.toggle('scroll-left', hasLeftShadow);
+                        element.classList.toggle('scroll-right', hasRightShadow);
+                    }
+                    
+                    // Initial check
+                    handleTabScroll(tabWrapper);
+                </script>
             </body>
             </html>
         `);

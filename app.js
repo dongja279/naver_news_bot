@@ -122,8 +122,10 @@ app.get('/category/:name', async (req, res) => {
                     }
                     .tab-container {
                         display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
+                        flex-wrap: nowrap; /* 모바일에서 한 줄로 표시 */
+                        overflow-x: auto; /* 가로 스크롤 가능하게 함 */
+                        -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
+                        justify-content: flex-start;
                         margin-bottom: 30px;
                         border-bottom: 1px solid #e9ecef;
                     }
@@ -135,6 +137,8 @@ app.get('/category/:name', async (req, res) => {
                         transition: all 0.3s ease;
                         font-size: 1rem;
                         border-bottom: 3px solid transparent;
+                        flex-shrink: 0; /* 탭이 줄어들지 않도록 함 */
+                        white-space: nowrap; /* 탭 이름이 줄바꿈되지 않도록 함 */
                     }
                     .tab-container a:hover, .tab-container a.tab-active {
                         color: #007bff;
@@ -183,32 +187,6 @@ app.get('/category/:name', async (req, res) => {
                         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
                     }
                     @media (max-width: 768px) {
-                        .tab-container {
-                            flex-wrap: nowrap;
-                            overflow-x: auto;
-                            -webkit-overflow-scrolling: touch;
-                            justify-content: flex-start;
-                        }
-                        .tab-container a {
-                            flex-shrink: 0;
-                            white-space: nowrap;
-                        }
-                    }
-                    @media (max-width: 600px) {
-                        .tab-container {
-                            /* 기존 설정 유지 */
-                            flex-wrap: nowrap;
-                            overflow-x: auto;
-                            -webkit-overflow-scrolling: touch;
-                            justify-content: flex-start;
-                            
-                            /* 추가된 스크롤바 스타일링 */
-                            -ms-overflow-style: none; /* IE and Edge */
-                            scrollbar-width: none; /* Firefox */
-                        }
-                        .tab-container::-webkit-scrollbar {
-                            display: none; /* Chrome, Safari, Opera */
-                        }
                         body {
                             padding: 10px;
                         }

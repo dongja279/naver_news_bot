@@ -195,6 +195,20 @@ app.get('/category/:name', async (req, res) => {
                         }
                     }
                     @media (max-width: 600px) {
+                        .tab-container {
+                            /* 기존 설정 유지 */
+                            flex-wrap: nowrap;
+                            overflow-x: auto;
+                            -webkit-overflow-scrolling: touch;
+                            justify-content: flex-start;
+                            
+                            /* 추가된 스크롤바 스타일링 */
+                            -ms-overflow-style: none; /* IE and Edge */
+                            scrollbar-width: none; /* Firefox */
+                        }
+                        .tab-container::-webkit-scrollbar {
+                            display: none; /* Chrome, Safari, Opera */
+                        }
                         body {
                             padding: 10px;
                         }

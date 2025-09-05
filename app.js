@@ -16,7 +16,7 @@ app.post('/kakaotalk', async (req, res) => {
     const userMessage = req.body.userRequest.utterance;
 
     try {
-        const response = await axios.get('[https://openapi.naver.com/v1/search/news.json](https://openapi.naver.com/v1/search/news.json)', {
+        const response = await axios.get('https://openapi.naver.com/v1/search/news.json', {
             params: {
                 query: userMessage,
                 display: 5,
